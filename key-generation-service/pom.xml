@@ -16,6 +16,17 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
+    <dependencies>
+
+        <!-- https://mvnrepository.com/artifact/io.kotlintest/kotlintest-runner-junit5 -->
+
+        <dependency>
+            <groupId>io.kotlintest</groupId>
+            <artifactId>kotlintest-runner-junit5</artifactId>
+            <version>3.4.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
