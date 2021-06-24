@@ -10,9 +10,20 @@ class FileBaseLongKeySequence(
 ) : KeySequence<Long, Long> {
 
     var writer: KeySequenceWriter<Long, Long> = FileLongKeySequenceWriter(namespace)
+        set(value) {
+            synchronized(this) {
+                field.close()
+                field = value
+            }
+        }
 
     init {
         writer.writeFully(this)
+        Runtime.getRuntime()
+            .addShutdownHook(Thread {
+                // release writer
+                writer.close()
+            })
     }
 
     override fun getKey(): Long {
@@ -42,5 +53,4 @@ class FileBaseLongKeySequence(
     override fun getNamespace(): String {
         return namespace
     }
-
 }

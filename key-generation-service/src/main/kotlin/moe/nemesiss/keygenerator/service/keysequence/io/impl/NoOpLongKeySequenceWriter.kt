@@ -11,4 +11,8 @@ class NoOpLongKeySequenceWriter : KeySequenceWriter<Long, Long> {
     override fun writeIncremental(keySequence: KeySequence<Long, Long>) {
 
     }
+
+    override fun close() {
+
+    }
 }

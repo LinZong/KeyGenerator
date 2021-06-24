@@ -53,6 +53,7 @@ class KeySequenceTest : FunSpec({
             loadFromDiskKeySeq.getKey() shouldBe 11
             null
         }
+
         // test globally search.
         FileLongKeySequenceLoader().loadAllKeySequences().any { ks -> ks.getNamespace() == "test" } shouldBe true
     }

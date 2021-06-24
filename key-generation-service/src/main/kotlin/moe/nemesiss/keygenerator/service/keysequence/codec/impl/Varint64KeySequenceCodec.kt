@@ -98,5 +98,4 @@ class Varint64KeySequenceCodec : KeySequenceCodec<Long, Long> {
         val key = Varint.decodeLong(keyVarint)
         return FileBaseLongKeySequence(header.namespace, key)
     }
-
 }

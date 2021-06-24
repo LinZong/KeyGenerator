@@ -14,18 +14,25 @@ class FileLongKeySequenceWriter(namespace: String) : KeySequenceWriter<Long, Lon
 
     private val keyFile = File(Configuration.KeyPath, "${namespace}.${KeySequenceWriter.Extensions.LongKey}")
 
+    private var raf = createKeyFileRaf()
+
+    private var rafOpen = true
+
     override fun writeFully(keySequence: KeySequence<Long, Long>) {
+        closeKeyFileRaf()
+
         val keyBytes = codec.encode(keySequence)
         BufferedOutputStream(FileOutputStream(keyFile))
             .use { writer ->
                 writer.write(keyBytes)
             }
+
+        raf = createKeyFileRaf()
     }
 
     override fun writeIncremental(keySequence: KeySequence<Long, Long>) {
         val bytes = codec.encode(keySequence)
         val skipBytes = codec.header.bytes.size
-        val raf = RandomAccessFile(keyFile, "rws")
         // seek to key pos.
         raf.seek(skipBytes.toLong())
         // write encoded key.
@@ -33,7 +40,24 @@ class FileLongKeySequenceWriter(namespace: String) : KeySequenceWriter<Long, Lon
         // reset file size.
         raf.setLength(bytes.size.toLong())
         // finished.
-        raf.close()
     }
 
+    private fun createKeyFileRaf(): RandomAccessFile {
+        if (rafOpen) {
+            return raf
+        }
+        rafOpen = true
+        return RandomAccessFile(keyFile, "rws")
+    }
+
+    private fun closeKeyFileRaf() {
+        if (rafOpen) {
+            rafOpen = false
+            raf.close()
+        }
+    }
+
+    override fun close() {
+        closeKeyFileRaf()
+    }
 }
