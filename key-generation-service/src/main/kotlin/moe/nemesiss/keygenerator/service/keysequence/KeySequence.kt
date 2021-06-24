@@ -1,6 +1,6 @@
 package moe.nemesiss.keygenerator.service.keysequence
 
-interface KeySequence<T : Number> {
+interface KeySequence<T, R : Number> {
 
     /**
      * get current key on sequence.
@@ -16,7 +16,7 @@ interface KeySequence<T : Number> {
      * get current key on sequence and increase it before return.
      * @return sequence key before increase.
      */
-    fun getAndIncrease(step: T): T
+    fun getAndIncrease(step: R): T
 
     /**
      * get namespace for key sequence.

@@ -1,25 +1,18 @@
 package moe.nemesiss.keygenerator.service.keysequence.impl
 
 import moe.nemesiss.keygenerator.service.keysequence.KeySequence
-import moe.nemesiss.keygenerator.service.keysequence.KeySequenceMetadata
-import moe.nemesiss.keygenerator.service.keysequence.codec.KeySequenceCodec
 import moe.nemesiss.keygenerator.service.keysequence.io.KeySequenceWriter
-import moe.nemesiss.keygenerator.service.keysequence.io.impl.FileKeySequenceWriter
+import moe.nemesiss.keygenerator.service.keysequence.io.impl.FileLongKeySequenceWriter
 
 class FileBaseLongKeySequence(
     private val namespace: String,
     private var value: Long,
-    private val codec: KeySequenceCodec<Long>
-) : KeySequence<Long> {
+) : KeySequence<Long, Long> {
 
-    var writer: KeySequenceWriter<Long> = FileKeySequenceWriter(namespace, codec)
-        set(value) {
-            field = value.apply { setCodec(codec) }
-            writer.writeMetadata(KeySequenceMetadata(codec::class.java.name))
-        }
+    var writer: KeySequenceWriter<Long, Long> = FileLongKeySequenceWriter(namespace)
 
     init {
-        writer.writeMetadata(KeySequenceMetadata(codec::class.java.name))
+        writer.writeFully(this)
     }
 
     override fun getKey(): Long {
@@ -32,7 +25,7 @@ class FileBaseLongKeySequence(
         try {
             this.value = value
             // encode
-            writer.writeKey(this)
+            writer.writeIncremental(this)
             // new value is published!
         } catch (e: Throwable) {
             // fallback to old value
@@ -49,4 +42,5 @@ class FileBaseLongKeySequence(
     override fun getNamespace(): String {
         return namespace
     }
+
 }

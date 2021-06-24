@@ -1,35 +1,23 @@
 package moe.nemesiss.keygenerator.service
 
-import com.alibaba.fastjson.JSON
 import io.kotest.assertions.throwables.shouldNotThrow
-import io.kotest.common.ExperimentalKotest
-import io.kotest.core.config.AbstractProjectConfig
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.test.TestCase
 import io.kotest.core.test.TestResult
 import io.kotest.matchers.longs.shouldBeExactly
 import io.kotest.matchers.shouldBe
-import moe.nemesiss.keygenerator.service.keysequence.KeySequenceMetadata
-import moe.nemesiss.keygenerator.service.keysequence.codec.impl.Varint64KeySequenceCodec
 import moe.nemesiss.keygenerator.service.keysequence.impl.FileBaseLongKeySequence
-import moe.nemesiss.keygenerator.service.keysequence.io.impl.FileKeySequenceLoader
-import moe.nemesiss.keygenerator.service.keysequence.io.impl.NoOpKeySequenceWriter
+import moe.nemesiss.keygenerator.service.keysequence.io.KeySequenceWriter
+import moe.nemesiss.keygenerator.service.keysequence.io.impl.FileLongKeySequenceLoader
+import moe.nemesiss.keygenerator.service.keysequence.io.impl.NoOpLongKeySequenceWriter
 import java.io.File
 import java.io.IOException
-
-object ProjectConfig : AbstractProjectConfig() {
-    @ExperimentalKotest
-    override val concurrentTests: Int
-        get() = 4
-
-    override val parallelism: Int = 4
-}
 
 class KeySequenceTest : FunSpec({
     test("increase correctly.") {
         val keySeq =
-            FileBaseLongKeySequence("test", 0, Varint64KeySequenceCodec())
-                .apply { writer = NoOpKeySequenceWriter() }
+            FileBaseLongKeySequence("test", 0)
+                .apply { writer = NoOpLongKeySequenceWriter() }
         keySeq.apply {
             getKey() shouldBeExactly 0
             getAndIncrease(1) shouldBeExactly 0
@@ -38,7 +26,8 @@ class KeySequenceTest : FunSpec({
         }
 
         val keySeqWithNonZeroInitValue =
-            FileBaseLongKeySequence("test2", 10, Varint64KeySequenceCodec())
+            FileBaseLongKeySequence("test2", 10)
+                .apply { writer = NoOpLongKeySequenceWriter() }
 
         keySeqWithNonZeroInitValue.apply {
             getKey() shouldBeExactly 10
@@ -49,16 +38,14 @@ class KeySequenceTest : FunSpec({
     }
 
     test("persist to disk correctly") {
-        val keySeq = FileBaseLongKeySequence("test", 0, Varint64KeySequenceCodec())
+        val keySeq = FileBaseLongKeySequence("test", 0)
         keySeq.getAndIncrease(1) shouldBeExactly 0
 
         // check file exists.
-        val metaFile = File(Configuration.KeyPath, "test.meta")
-        metaFile.exists() shouldBe true
+        val keyFile = File(Configuration.KeyPath, "test.${KeySequenceWriter.Extensions.LongKey}")
+        keyFile.exists() shouldBe true
         shouldNotThrow<IOException> {
-            val meta = JSON.parseObject(metaFile.readText(), KeySequenceMetadata::class.java)
-            meta.codecQualifyName shouldBe Varint64KeySequenceCodec::class.java.name
-            val loadFromDiskKeySeq = FileKeySequenceLoader().loadKeySequence("test", meta)
+            val loadFromDiskKeySeq = FileLongKeySequenceLoader().loadKeySequence(keyFile)
             // increased before.
             loadFromDiskKeySeq.getNamespace() shouldBe "test"
             loadFromDiskKeySeq.getKey() shouldBe 1
@@ -67,7 +54,7 @@ class KeySequenceTest : FunSpec({
             null
         }
         // test globally search.
-        FileKeySequenceLoader().loadAllKeySequences().any { ks -> ks.getNamespace() == "test" } shouldBe true
+        FileLongKeySequenceLoader().loadAllKeySequences().any { ks -> ks.getNamespace() == "test" } shouldBe true
     }
 }) {
 

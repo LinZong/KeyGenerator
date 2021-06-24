@@ -13,9 +13,9 @@ import java.nio.charset.StandardCharsets
  *
  * a varint value: [varint length(1) | varint byte array]
  */
-class Varint64KeySequenceCodec : KeySequenceCodec<Long> {
+class Varint64KeySequenceCodec : KeySequenceCodec<Long, Long> {
 
-    private class Header(val namespace: String) {
+    class Header(val namespace: String) {
         val bytes: ByteArray by lazy { encodedBytes() }
 
         private fun encodedBytes(): ByteArray {
@@ -63,9 +63,10 @@ class Varint64KeySequenceCodec : KeySequenceCodec<Long> {
         }
     }
 
-    private var header = Header.EMPTY
+    var header = Header.EMPTY
+        private set
 
-    override fun encode(key: KeySequence<Long>): ByteArray {
+    override fun encode(key: KeySequence<Long, Long>): ByteArray {
         val currentHeader = Header(key.getNamespace())
         if (currentHeader != header) {
             header = currentHeader
@@ -86,7 +87,7 @@ class Varint64KeySequenceCodec : KeySequenceCodec<Long> {
         return header.bytes.join(keyBytes)
     }
 
-    override fun decode(data: ByteArray): KeySequence<Long> {
+    override fun decode(data: ByteArray): KeySequence<Long, Long> {
         var (header, readBytes) = Header.decodeHeader(data)
         // update cached keys.
         this.header = header
@@ -95,6 +96,7 @@ class Varint64KeySequenceCodec : KeySequenceCodec<Long> {
         val keyVarint = data.copyOfRange(readBytes, readBytes + keyVarintLength)
         readBytes += keyVarintLength
         val key = Varint.decodeLong(keyVarint)
-        return FileBaseLongKeySequence(header.namespace, key, this)
+        return FileBaseLongKeySequence(header.namespace, key)
     }
+
 }
