@@ -6,16 +6,20 @@ import moe.nemesiss.keygenerator.service.keysequence.codec.KeySequenceCodec
 import moe.nemesiss.keygenerator.service.keysequence.io.KeySequenceWriter
 import moe.nemesiss.keygenerator.service.keysequence.io.impl.FileKeySequenceWriter
 
-class LocalLongKeySequence(
+class FileBaseLongKeySequence(
     private val namespace: String,
     private var value: Long,
-    private val codec: KeySequenceCodec<Long>,
-    private val writer: KeySequenceWriter = FileKeySequenceWriter(namespace)
+    private val codec: KeySequenceCodec<Long>
 ) : KeySequence<Long> {
 
+    var writer: KeySequenceWriter<Long> = FileKeySequenceWriter(namespace, codec)
+        set(value) {
+            field = value.apply { setCodec(codec) }
+            writer.writeMetadata(KeySequenceMetadata(codec::class.java.name))
+        }
 
     init {
-        writer.writeMetadata(KeySequenceMetadata(codec.javaClass.name))
+        writer.writeMetadata(KeySequenceMetadata(codec::class.java.name))
     }
 
     override fun getKey(): Long {
@@ -28,8 +32,7 @@ class LocalLongKeySequence(
         try {
             this.value = value
             // encode
-            val bytes = codec.encode(this)
-            writeToDisk(bytes)
+            writer.writeKey(this)
             // new value is published!
         } catch (e: Throwable) {
             // fallback to old value
@@ -45,9 +48,5 @@ class LocalLongKeySequence(
 
     override fun getNamespace(): String {
         return namespace
-    }
-
-    private fun writeToDisk(bytes: ByteArray) {
-        writer.writeKey(bytes)
     }
 }

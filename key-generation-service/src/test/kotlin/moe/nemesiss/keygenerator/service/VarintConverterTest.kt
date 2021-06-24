@@ -10,7 +10,6 @@ class VarintConverterTest : FunSpec({
         for (i in -1048576..1048577) {
             Varint.decodeInt(Varint.encodeInt(i)) shouldBeExactly i
         }
-
         Varint.decodeInt(Varint.encodeInt(Int.MAX_VALUE)) shouldBeExactly Int.MAX_VALUE
         Varint.decodeInt(Varint.encodeInt(Int.MIN_VALUE)) shouldBeExactly Int.MIN_VALUE
     }

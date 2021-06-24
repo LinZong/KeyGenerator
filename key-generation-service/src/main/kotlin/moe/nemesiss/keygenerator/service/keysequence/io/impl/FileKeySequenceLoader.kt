@@ -5,11 +5,12 @@ import moe.nemesiss.keygenerator.service.Configuration
 import moe.nemesiss.keygenerator.service.keysequence.KeySequence
 import moe.nemesiss.keygenerator.service.keysequence.KeySequenceMetadata
 import moe.nemesiss.keygenerator.service.keysequence.codec.KeySequenceCodec
+import moe.nemesiss.keygenerator.service.keysequence.io.KeySequenceLoader
 import mu.KotlinLogging
 import java.io.File
 
 
-class FileKeySequenceLoader {
+class FileKeySequenceLoader : KeySequenceLoader {
 
     companion object {
         private val log = KotlinLogging.logger("KeySequenceLoader")
@@ -18,14 +19,11 @@ class FileKeySequenceLoader {
     fun loadAllKeySequences(): List<KeySequence<Number>> {
         val keySequenceMetadataFiles =
             Configuration.KeyPath.listFiles { file -> file.isFile && file.extension == "meta" } ?: return emptyList()
-
         val result = arrayListOf<KeySequence<Number>>()
-
         for (file in keySequenceMetadataFiles) {
             val namespace = file.nameWithoutExtension
             try {
-                val text = file.readText()
-                val metadata = JSON.parseObject(text, KeySequenceMetadata::class.java)
+                val metadata = loadMetadata(file)
                 val keySequence = loadKeySequence(namespace, metadata)
                 result += keySequence
             } catch (e: Throwable) {
@@ -41,8 +39,17 @@ class FileKeySequenceLoader {
         if (!keyFile.exists()) {
             throw IllegalArgumentException("key file: $namespace is not exist!")
         }
-        val keyBytes = keyFile.readBytes()
+        val keyBytes = loadKeySequenceBytes(keyFile)
+        // KeySequence <-> KeySequenceCodec <-> Loader/Writer
         val codec = Class.forName(metadata.codecQualifyName).newInstance() as KeySequenceCodec<Number>
         return codec.decode(keyBytes)
+    }
+
+    override fun loadMetadata(metaFile: File): KeySequenceMetadata {
+        return JSON.parseObject(metaFile.readText(), KeySequenceMetadata::class.java)
+    }
+
+    override fun loadKeySequenceBytes(keySequenceFile: File): ByteArray {
+        return keySequenceFile.readBytes()
     }
 }

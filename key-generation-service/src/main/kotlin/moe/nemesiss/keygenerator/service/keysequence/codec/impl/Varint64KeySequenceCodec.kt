@@ -2,7 +2,7 @@ package moe.nemesiss.keygenerator.service.keysequence.codec.impl
 
 import moe.nemesiss.keygenerator.service.keysequence.KeySequence
 import moe.nemesiss.keygenerator.service.keysequence.codec.KeySequenceCodec
-import moe.nemesiss.keygenerator.service.keysequence.impl.LocalLongKeySequence
+import moe.nemesiss.keygenerator.service.keysequence.impl.FileBaseLongKeySequence
 import moe.nemesiss.keygenerator.service.util.Varint
 import moe.nemesiss.keygenerator.service.util.join
 import java.nio.charset.StandardCharsets
@@ -95,6 +95,6 @@ class Varint64KeySequenceCodec : KeySequenceCodec<Long> {
         val keyVarint = data.copyOfRange(readBytes, readBytes + keyVarintLength)
         readBytes += keyVarintLength
         val key = Varint.decodeLong(keyVarint)
-        return LocalLongKeySequence(header.namespace, key, this)
+        return FileBaseLongKeySequence(header.namespace, key, this)
     }
 }
