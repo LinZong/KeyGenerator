@@ -4,6 +4,10 @@ import moe.nemesiss.keygenerator.service.keysequence.KeySequence
 import moe.nemesiss.keygenerator.service.keysequence.KeySequenceMetadata
 import moe.nemesiss.keygenerator.service.keysequence.codec.KeySequenceCodec
 
+/**
+ * Design pattern
+ * KeySequence Instance <-> KeySequenceCodec(recorded in metadata) <-> Loader/Writer
+ */
 interface KeySequenceWriter<T : Number> {
 
     /**

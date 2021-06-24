@@ -40,7 +40,6 @@ class FileKeySequenceLoader : KeySequenceLoader {
             throw IllegalArgumentException("key file: $namespace is not exist!")
         }
         val keyBytes = loadKeySequenceBytes(keyFile)
-        // KeySequence <-> KeySequenceCodec <-> Loader/Writer
         val codec = Class.forName(metadata.codecQualifyName).newInstance() as KeySequenceCodec<Number>
         return codec.decode(keyBytes)
     }
