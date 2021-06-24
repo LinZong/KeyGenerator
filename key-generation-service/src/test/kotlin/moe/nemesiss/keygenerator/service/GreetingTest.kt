@@ -1,7 +1,8 @@
 package moe.nemesiss.keygenerator.service
 
-import io.kotlintest.matchers.numerics.shouldBeExactly
-import io.kotlintest.specs.FunSpec
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.ints.shouldBeExactly
+
 
 class GreetingTest : FunSpec({
     test("test framework run smoothly") {
