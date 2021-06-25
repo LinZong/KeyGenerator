@@ -6,6 +6,7 @@
     <modules>
         <module>key-generation-service</module>
         <module>loadbalancer</module>
+        <module>proto-definition</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -21,6 +22,9 @@
     <properties>
         <java.version>1.8</java.version>
         <kotlin.version>1.5.10</kotlin.version>
+        <grpc.kotlin.version>1.1.0</grpc.kotlin.version>
+        <protobuf.version>3.17.2</protobuf.version>
+        <grpc.version>1.38.0</grpc.version>
     </properties>
 
     <dependencies>
@@ -40,20 +44,12 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                </plugin>
-
-                <plugin>
                     <groupId>org.jetbrains.kotlin</groupId>
                     <artifactId>kotlin-maven-plugin</artifactId>
                     <configuration>
                         <args>
                             <arg>-Xjsr305=strict</arg>
                         </args>
-                        <compilerPlugins>
-                            <plugin>spring</plugin>
-                        </compilerPlugins>
                     </configuration>
                     <dependencies>
                         <dependency>

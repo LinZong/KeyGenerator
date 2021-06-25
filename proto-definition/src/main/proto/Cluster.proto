@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package moe.nemesiss.keygenerator.grpc.model;
+
+option java_multiple_files = true;
+
+message JoinRequest {
+  // joining group's namespace
+  string namespace = 1;
+  // group unique id
+  string groupId = 2;
+  // client-side epoch
+  int32 epoch = 3;
+  // client name
+  string name = 4;
+}
+
+message JoinResult {
+  // result code
+  int32 code = 1;
+  // epoch of joined group
+  int32 epoch = 2;
+  // new key
+  int64 key = 3;
+  // increase step
+  int32 step = 4;
+  // joined group's namespace
+  string namespace = 5;
+  // joined group's unique id
+  string groupId = 6;
+}
+
+message GetKeyRequest {}
+message GetKeyResult {
+  // result code
+  int32 code = 1;
+  // returned key before increased.
+  int64 key = 2;
+}
+
+message PingRequest {
+  string namespace = 1;
+  string groupId = 2;
+  string epoch = 3;
+  string name = 4;
+}
+
+message PongResult {
+  int32 code = 1;
+}
+
+service LoadBalancer {
+  rpc Join(JoinRequest) returns (JoinRequest);
+  rpc Ping(PingRequest) returns (PongResult);
+}
+
+message Empty {}
+
+service KeyGeneratorNode {
+  rpc GetKey(GetKeyRequest) returns (GetKeyResult);
+  rpc GetAndIncreaseKey(GetKeyRequest) returns (GetKeyResult);
+  rpc SendAsyncJoinResult(Empty) returns (JoinResult);
+}
