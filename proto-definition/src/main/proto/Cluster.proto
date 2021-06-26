@@ -13,6 +13,8 @@ message JoinRequest {
   int32 epoch = 3;
   // client name
   string name = 4;
+  // ticket
+  string ticket = 5;
 }
 
 message JoinResult {
@@ -28,6 +30,8 @@ message JoinResult {
   string namespace = 5;
   // joined group's unique id
   string groupId = 6;
+  // ticket
+  string ticket = 7;
 }
 
 message GetKeyRequest {}
@@ -41,7 +45,7 @@ message GetKeyResult {
 message PingRequest {
   string namespace = 1;
   string groupId = 2;
-  string epoch = 3;
+  int32 epoch = 3;
   string name = 4;
 }
 
@@ -50,7 +54,7 @@ message PongResult {
 }
 
 service LoadBalancer {
-  rpc Join(JoinRequest) returns (JoinRequest);
+  rpc Join(JoinRequest) returns (JoinResult);
   rpc Ping(PingRequest) returns (PongResult);
 }
 
@@ -59,5 +63,5 @@ message Empty {}
 service KeyGeneratorNode {
   rpc GetKey(GetKeyRequest) returns (GetKeyResult);
   rpc GetAndIncreaseKey(GetKeyRequest) returns (GetKeyResult);
-  rpc SendAsyncJoinResult(Empty) returns (JoinResult);
+  rpc SendAsyncJoinResult(JoinResult) returns (Empty);
 }

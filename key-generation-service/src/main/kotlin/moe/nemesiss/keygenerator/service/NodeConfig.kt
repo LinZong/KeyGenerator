@@ -5,16 +5,24 @@ import java.net.Inet4Address
 
 
 class NodeConfig(
+    val namespace: String,
+    val name: String,
     val dataDir: File,
     val host: String,
     val port: Int,
     val loadbalancerHost: String,
     val loadBalancerPort: Int
 ) {
-
     fun validate() {
         validateDataDir()
         validateHostAndPort()
+        validateInstanceName()
+    }
+
+    private fun validateInstanceName() {
+        if (name.isBlank()) {
+            throw IllegalArgumentException("instance name should not be blank!")
+        }
     }
 
     private fun validateDataDir() {
@@ -33,4 +41,11 @@ class NodeConfig(
             throw IllegalArgumentException("port of load balancer is illegal, should be in [0, 65535].")
         }
     }
+
+    override fun toString() = """
+        namespace: [$namespace]
+        data dir: [${dataDir.absolutePath}]
+        node endpoint: [$host:$port]
+        load balancer endpoint: [$loadbalancerHost:$loadBalancerPort]
+    """
 }
