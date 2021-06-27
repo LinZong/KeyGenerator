@@ -15,6 +15,10 @@ message JoinRequest {
   string name = 4;
   // ticket
   string ticket = 5;
+  // client host
+  string host = 8;
+  // client port
+  int32 port = 9;
 }
 
 message JoinResult {

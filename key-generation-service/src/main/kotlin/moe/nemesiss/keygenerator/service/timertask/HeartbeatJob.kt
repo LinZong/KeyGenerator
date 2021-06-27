@@ -1,13 +1,14 @@
 package moe.nemesiss.keygenerator.service.timertask
 
+import io.grpc.Status
+import io.grpc.StatusException
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
+import moe.nemesiss.keygenerator.base.constant.NodeState
+import moe.nemesiss.keygenerator.base.constant.Pong
 import moe.nemesiss.keygenerator.grpc.model.pingRequest
 import moe.nemesiss.keygenerator.service.ClusterInfo
 import moe.nemesiss.keygenerator.service.LoadBalancerClientKt
 import moe.nemesiss.keygenerator.service.NodeConfig
-import moe.nemesiss.keygenerator.service.constant.NodeState
-import moe.nemesiss.keygenerator.service.constant.Pong
 import org.quartz.*
 
 interface HeartbeatJobCallback {
@@ -49,10 +50,10 @@ class HeartbeatJob : Job {
     }
 
     override fun execute(context: JobExecutionContext) {
-        val client = context.get("loadbalancer") as LoadBalancerClientKt
-        val nodeConfig = context.get("nodeConfig") as NodeConfig
-        val clusterInfo = context.get("clusterInfo") as ClusterInfo
-        val callback = context.get("callback") as HeartbeatJobCallback
+        val client = context.mergedJobDataMap["loadbalancer"] as LoadBalancerClientKt
+        val nodeConfig = context.mergedJobDataMap["nodeConfig"] as NodeConfig
+        val clusterInfo = context.mergedJobDataMap["clusterInfo"] as ClusterInfo
+        val callback = context.mergedJobDataMap["callback"] as HeartbeatJobCallback
 
         try {
             if (clusterInfo.state != NodeState.RUNNING) {
@@ -62,13 +63,19 @@ class HeartbeatJob : Job {
             }
 
             val pong = runBlocking {
-                withTimeoutOrNull(1 * 1000) {
+                try {
                     client.ping(pingRequest {
                         namespace = nodeConfig.namespace
                         groupId = clusterInfo.groupId
                         epoch = clusterInfo.epoch
                         name = nodeConfig.name
                     })
+                } catch (se: StatusException) {
+                    if (se.status == Status.DEADLINE_EXCEEDED) {
+                        // timeout, return null.
+                        null
+                    }
+                    else throw se
                 }
             }
 

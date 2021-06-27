@@ -1,6 +1,5 @@
 package moe.nemesiss.keygenerator.service
 
-import io.grpc.CallOptions
 import io.grpc.ManagedChannelBuilder
 import moe.nemesiss.keygenerator.grpc.model.JoinRequest
 import moe.nemesiss.keygenerator.grpc.model.LoadBalancerGrpcKt
@@ -13,10 +12,14 @@ class LoadBalancerClientKt(nodeConfig: NodeConfig) {
         ManagedChannelBuilder.forAddress(
             nodeConfig.loadbalancerHost,
             nodeConfig.loadBalancerPort
-        ).usePlaintext().build(), CallOptions.DEFAULT.withDeadlineAfter(200, TimeUnit.MILLISECONDS)
+        ).usePlaintext().build()
     )
 
-    suspend fun join(joinRequest: JoinRequest) = stub.join(joinRequest)
+    suspend fun join(joinRequest: JoinRequest) = stub
+                                                            .withDeadlineAfter(30, TimeUnit.SECONDS)
+                                                            .join(joinRequest)
 
-    suspend fun ping(pingRequest: PingRequest) = stub.ping(pingRequest)
+    suspend fun ping(pingRequest: PingRequest) = stub
+                                                             .withDeadlineAfter(200, TimeUnit.MILLISECONDS)
+                                                             .ping(pingRequest)
 }

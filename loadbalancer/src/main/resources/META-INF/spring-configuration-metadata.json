@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "loadbalancer.data-dir",
+      "type": "java.lang.String",
+      "description": "Key生成服务协调器持久化目录"
+    },
+    {
+      "name": "loadbalancer.grpc.port",
+      "type": "java.lang.Integer",
+      "description": "Key协调器GRPC服务端口"
+    }
+  ]
+}

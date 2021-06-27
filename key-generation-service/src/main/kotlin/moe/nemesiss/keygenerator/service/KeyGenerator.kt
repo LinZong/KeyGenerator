@@ -1,8 +1,8 @@
 package moe.nemesiss.keygenerator.service
 
 import moe.nemesiss.keygenerator.service.repo.KeyRepository
-import moe.nemesiss.keygenerator.service.util.guard
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.withLock
 
 class KeyGenerator(private val keyRepository: KeyRepository, initValue: Long) {
 
@@ -14,14 +14,13 @@ class KeyGenerator(private val keyRepository: KeyRepository, initValue: Long) {
 
     @Volatile
     var key: Long = initValue
-        get() = rl.guard { field }
-        set(value) = wl.guard { field = value }
+        get() = rl.withLock { field }
+        set(value) = wl.withLock { field = value }
 
-    fun getAndIncrease(step: Int) = wl.guard {
+    fun getAndIncrease(step: Int) = wl.withLock {
         val oldKey = key
         key += step
         keyRepository.save(key)
-        return@guard oldKey
+        return@withLock oldKey
     }
-
 }

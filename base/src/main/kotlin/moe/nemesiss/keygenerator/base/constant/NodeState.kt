@@ -1,4 +1,4 @@
-package moe.nemesiss.keygenerator.service.constant
+package moe.nemesiss.keygenerator.base.constant
 
 /**
  * State transformation graph:
