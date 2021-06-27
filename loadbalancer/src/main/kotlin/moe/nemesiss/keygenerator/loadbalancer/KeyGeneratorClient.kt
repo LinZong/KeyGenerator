@@ -22,11 +22,11 @@ class KeyGeneratorClient(val name: String, host: String, port: Int) {
         private set
 
     fun getKey() = runBlocking {
-        stub.withDeadlineAfter(200, TimeUnit.MILLISECONDS).getKey(getKeyRequest { })
+        stub.withDeadlineAfter(100, TimeUnit.MILLISECONDS).getKey(getKeyRequest { })
     }
 
     fun getAndIncreaseKey() = runBlocking {
-        stub.withDeadlineAfter(200, TimeUnit.MILLISECONDS).getAndIncreaseKey(getKeyRequest { })
+        stub.withDeadlineAfter(100, TimeUnit.MILLISECONDS).getAndIncreaseKey(getKeyRequest { })
     }
 
     fun sendAsyncJoinResult(joinResult: JoinResult) = runBlocking {

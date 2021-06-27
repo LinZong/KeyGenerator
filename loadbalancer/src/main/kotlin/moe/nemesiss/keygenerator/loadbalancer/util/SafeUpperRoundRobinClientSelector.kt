@@ -53,6 +53,10 @@ class SafeUpperRoundRobinClientSelector(
 
     val elementSnapshot get() = rl.withLock { LinkedList(elements) }
 
+    fun addElement(e: KeyGeneratorClient) {
+        wl.withLock { elements += e }
+    }
+
     @Synchronized
     override fun next(): KeyGeneratorClient {
         val snapshot = elementSnapshot

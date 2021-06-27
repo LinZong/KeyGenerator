@@ -11,7 +11,6 @@ import moe.nemesiss.keygenerator.loadbalancer.exception.KeyGeneratorGroupRebalan
 import moe.nemesiss.keygenerator.loadbalancer.exception.SafeUpperBoundRoundRobinSelectorException
 import moe.nemesiss.keygenerator.loadbalancer.repo.GroupMetaRepository
 import mu.KotlinLogging
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 private const val ClientErrorThreshold = 3
@@ -148,9 +147,7 @@ class KeyGeneratorGroup(
             log.info { "$joinRequest same epoch, namespace and groupId, go fastpath." }
             // epoch相同，直接加锁，写实例即可。
             synchronized(this) {
-                val elements = rrSelector.elementSnapshot
-                elements += KeyGeneratorClient(joinRequest.name, joinRequest.host, joinRequest.port)
-                rrSelector.elements = elements
+                rrSelector.addElement(KeyGeneratorClient(joinRequest.name, joinRequest.host, joinRequest.port))
             }
             advanceMode(KeyGeneratorGroupMode.REBALANCING, KeyGeneratorGroupMode.RUNNING)
             log.info { "$joinRequest fastpath end." }
